@@ -173,8 +173,9 @@ h1 {
 <!-- Start Overlay -->
 <div id="startOverlay">
   <button id="startButton">Click to Start 🎵💖</button>
-<audio id="bgMusic" src="music/rlmjmd.mp3"></audio>
 
+  <!-- FIXED AUDIO ELEMENT -->
+  <audio id="bgMusic" src="music/rlmjmd.mp3"></audio>
 </div>
 
 <div id="gameContainer">
@@ -211,12 +212,14 @@ MEMORIES.forEach(src => {
   img.src = src;
 });
 
+// Custom cursor
 const cursorDot = document.getElementById("cursorDot");
 window.addEventListener("mousemove", e => {
   cursorDot.style.left = e.clientX+"px";
   cursorDot.style.top = e.clientY+"px";
 });
 
+// Heart creation
 function createHeart() {
   const h = document.createElement("div");
   h.className = "heart";
@@ -229,15 +232,15 @@ function createHeart() {
     if(!playing) return;
     heartsCaught++;
     const match = memoryMap.find(m=>m.trigger===heartsCaught);
-    if(match) showMemory(match.src, match.trigger);
+    if(match) showMemory(match.src);
     h.remove();
     if(heartsCaught >= TOTAL_HEARTS) endGame();
   };
 
   setTimeout(()=>h.remove(), 14000);
-  return h;
 }
 
+// Burst of hearts
 function spawnBurst() {
   if(!playing) return;
   for(let i=0;i<5;i++){
@@ -247,6 +250,7 @@ function spawnBurst() {
 
 let burstTimer = null;
 
+// Start game
 function startGame() {
   heartsCaught = 0;
   playing = true;
@@ -255,9 +259,10 @@ function startGame() {
   burstTimer = setInterval(spawnBurst, 1200);
 }
 
+// Show memory
 const memoryBox = document.getElementById("memoryBox");
 
-function showMemory(src, triggerNumber) {
+function showMemory(src) {
   playing = false;
   memoryBox.innerHTML = `<img src="${src}">`;
   memoryBox.style.display = "flex";
@@ -268,6 +273,7 @@ function showMemory(src, triggerNumber) {
   }, 4000);
 }
 
+// End game
 const letterOverlay = document.getElementById("letterOverlay");
 const letterCard = document.getElementById("letterCard");
 const finalMessage = document.getElementById("finalMessage");
@@ -284,6 +290,7 @@ function endGame() {
       <p>My love, my happiness, my everything…</p>
       <button id="nextBtn" style="margin-top:20px;padding:10px 18px;background:#ff4b72;color:#fff;border:none;border-radius:10px;font-size:1rem;">Next</button>
     `;
+
     letterOverlay.style.display = "flex";
 
     document.getElementById("nextBtn").onclick = () => {
@@ -293,18 +300,5 @@ function endGame() {
   }, 1000);
 }
 
-// Start button logic: DIRECT PLAY
-const startButton = document.getElementById("startButton");
-const startOverlay = document.getElementById("startOverlay");
-
-startButton.addEventListener("click", () => {
-  try {
-    bgMusic.volume = 0.5;
-    bgMusic.play().then(() => console.log("Music playing")).catch(()=>alert("Tap again to start music"));
-  } catch(e) {}
-  startOverlay.style.display = "none";
-  startGame();
-});
-</script>
-</body>
-</html>
+// START BUTTON → PLAY MUSIC + START GAME
+const startButton = document.getElementById("startButton
