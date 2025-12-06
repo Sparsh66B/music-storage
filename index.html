@@ -17,15 +17,10 @@ body {
   font-family: "Poppins", sans-serif;
   background: linear-gradient(135deg, var(--pink1), var(--pink2));
   overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
   cursor: none;
 }
 
-@media (hover: none) { #cursorDot { display: none; } }
-
+/* ✅ CUSTOM CURSOR */
 .custom-cursor {
   position: fixed;
   width: 14px;
@@ -34,9 +29,12 @@ body {
   background: rgba(255,75,114,0.95);
   pointer-events: none;
   transform: translate(-50%, -50%);
-  z-index: 2000;
+  z-index: 3000;
 }
 
+@media (hover: none) { .custom-cursor { display: none; } }
+
+/* ✅ GAME CONTENT */
 #gameContainer {
   text-align: center;
   color: #fff;
@@ -46,15 +44,16 @@ body {
 
 h1 {
   font-size: 2rem;
-  margin: 8px 0 16px;
   text-shadow: 0 0 10px rgba(255,255,255,0.6);
 }
 
+/* ✅ HEARTS → BEHIND MEMORIES */
 .heart {
   position: absolute;
   font-size: 36px;
   cursor: pointer;
   animation: floatUp 14s linear forwards;
+  z-index: 5;
 }
 
 @keyframes floatUp {
@@ -62,14 +61,38 @@ h1 {
   to { transform: translateY(-120vh); opacity: 0; }
 }
 
-#memoryBox, #letterOverlay, #finalMessage {
-  display: none;
+/* ✅ MEMORY DISPLAY – ORIGINAL SIZE */
+#memoryBox {
   position: fixed;
   inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;
   justify-content: center;
   align-items: center;
+  z-index: 1500;
 }
 
+#memoryBox img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* ✅ ORIGINAL PROPORTIONS */
+  border-radius: 10px;
+}
+
+/* ✅ FINAL MESSAGE */
+#finalMessage {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  color: #ff2d5a;
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+/* ✅ START OVERLAY */
 #startOverlay {
   position: fixed;
   inset: 0;
@@ -77,6 +100,7 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 2500;
 }
 
 #startButton {
@@ -95,6 +119,7 @@ h1 {
 
 <div class="custom-cursor" id="cursorDot"></div>
 
+<!-- ✅ START -->
 <div id="startOverlay">
   <button id="startButton">Click to Start 🎵💖</button>
   <audio id="bgMusic" src="music/rlmjmd.mp3"></audio>
@@ -106,13 +131,7 @@ h1 {
 
 <div id="memoryBox"></div>
 
-<div id="letterOverlay">
-  <div id="letterCard"></div>
-</div>
-
-<div id="finalMessage">
-  <h2>I LOVE YOU DARLING ♥</h2>
-</div>
+<div id="finalMessage">I LOVE YOU DARLING ♥</div>
 
 <script>
 const TOTAL_HEARTS = 25;
@@ -127,29 +146,19 @@ const MEMORIES = [
 const triggers = [3,7,11,14,17,22,25];
 
 const bgMusic = document.getElementById("bgMusic");
-  // ✅ CUSTOM CURSOR MOVE FIX
 const cursorDot = document.getElementById("cursorDot");
 
-document.addEventListener("mousemove", (e) => {
+/* ✅ CURSOR FIX */
+document.addEventListener("mousemove", e => {
   cursorDot.style.left = e.clientX + "px";
   cursorDot.style.top = e.clientY + "px";
 });
 
-// Mobile support (touch)
-document.addEventListener("touchmove", (e) => {
-  const touch = e.touches[0];
-  if (!touch) return;
-  cursorDot.style.left = touch.clientX + "px";
-  cursorDot.style.top = touch.clientY + "px";
-});
-
-const startButton = document.getElementById("startButton");
-const startOverlay = document.getElementById("startOverlay");
-
-startButton.addEventListener("click", () => {
+/* ✅ START GAME */
+document.getElementById("startButton").addEventListener("click", () => {
   bgMusic.volume = 0.5;
-  bgMusic.play();          // ✅ FIXED: plays in user gesture
-  startOverlay.style.display = "none";
+  bgMusic.play();
+  document.getElementById("startOverlay").style.display = "none";
   startGame();
 });
 
@@ -160,6 +169,7 @@ function startGame() {
   burstTimer = setInterval(spawnBurst, 1200);
 }
 
+/* ✅ HEART LOGIC */
 function createHeart() {
   const h = document.createElement("div");
   h.className = "heart";
@@ -176,7 +186,6 @@ function createHeart() {
     if (triggers.includes(heartsCaught)) {
       showMemory(MEMORIES[triggers.indexOf(heartsCaught)]);
     }
-
     if(heartsCaught >= TOTAL_HEARTS) endGame();
   };
 
@@ -188,10 +197,11 @@ function spawnBurst() {
   for(let i=0;i<5;i++) setTimeout(createHeart, i*200);
 }
 
+/* ✅ MEMORY FRONT, HEARTS BACK */
 function showMemory(src) {
   playing = false;
   const box = document.getElementById("memoryBox");
-  box.innerHTML = `<img src="${src}" style="max-width:90%">`;
+  box.innerHTML = `<img src="${src}">`;
   box.style.display = "flex";
 
   setTimeout(() => {
