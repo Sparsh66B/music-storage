@@ -127,6 +127,22 @@ const MEMORIES = [
 const triggers = [3,7,11,14,17,22,25];
 
 const bgMusic = document.getElementById("bgMusic");
+  // ✅ CUSTOM CURSOR MOVE FIX
+const cursorDot = document.getElementById("cursorDot");
+
+document.addEventListener("mousemove", (e) => {
+  cursorDot.style.left = e.clientX + "px";
+  cursorDot.style.top = e.clientY + "px";
+});
+
+// Mobile support (touch)
+document.addEventListener("touchmove", (e) => {
+  const touch = e.touches[0];
+  if (!touch) return;
+  cursorDot.style.left = touch.clientX + "px";
+  cursorDot.style.top = touch.clientY + "px";
+});
+
 const startButton = document.getElementById("startButton");
 const startOverlay = document.getElementById("startOverlay");
 
