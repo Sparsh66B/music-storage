@@ -25,23 +25,17 @@
   </style>
 </head>
 
-<body>
+<body onclick="startMusic()">
+    <audio id="bgMusic" src="music/rlmjmd.mp3?v=2"></audio>
 
-<h2>Audio Test Page</h2>
-<p>Click the button – if music plays, GitHub hosting is working.</p>
+    <script>
+        function startMusic() {
+            const audio = document.getElementById('bgMusic');
+            audio.play().catch(err => console.log(err));
+        }
+    </script>
 
-<button id="playBtn">Play Music</button>
-
-<audio id="bgMusic" src="music/rlmjmd.mp3?v=2"></audio>
-
-<script>
-document.getElementById("playBtn").addEventListener("click", () => {
-  const audio = document.getElementById("testAudio");
-  audio.play()
-    .then(() => alert("SUCCESS: Audio is playing 🎵"))
-    .catch(err => alert("FAILED: " + err));
-});
-</script>
-
+    <h1>Tap anywhere to start music 🎵</h1>
 </body>
+
 </html>
