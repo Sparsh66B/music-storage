@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Audio Test</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial;
+      background: #ffe4ec;
+      flex-direction: column;
+    }
+    button {
+      padding: 15px 25px;
+      font-size: 20px;
+      background: hotpink;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Audio Test Page</h2>
+<p>Click the button – if music plays, GitHub hosting is working.</p>
+
+<button id="playBtn">Play Music</button>
+
+<audio id="testAudio" src="music/rlmjmd.mp3"></audio>
+
+<script>
+document.getElementById("playBtn").addEventListener("click", () => {
+  const audio = document.getElementById("testAudio");
+  audio.play()
+    .then(() => alert("SUCCESS: Audio is playing 🎵"))
+    .catch(err => alert("FAILED: " + err));
+});
+</script>
+
+</body>
+</html>
