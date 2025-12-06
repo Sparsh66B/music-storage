@@ -35,17 +35,6 @@ body {
   pointer-events: none;
   transform: translate(-50%, -50%);
   z-index: 2000;
-  box-shadow: 0 0 6px rgba(255,75,114,0.6);
-}
-
-#musicNote {
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  z-index: 1500;
-  color: #fff;
-  font-size: 14px;
-  opacity: 0.9;
 }
 
 #gameContainer {
@@ -53,10 +42,6 @@ body {
   color: #fff;
   z-index: 10;
   margin-top: 48px;
-  width: 100%;
-  max-width: 980px;
-  padding: 18px;
-  box-sizing: border-box;
 }
 
 h1 {
@@ -67,13 +52,9 @@ h1 {
 
 .heart {
   position: absolute;
-  left: 0;
-  top: 0;
   font-size: 36px;
-  user-select: none;
   cursor: pointer;
   animation: floatUp 14s linear forwards;
-  z-index: 8;
 }
 
 @keyframes floatUp {
@@ -81,74 +62,21 @@ h1 {
   to { transform: translateY(-120vh); opacity: 0; }
 }
 
-#memoryBox {
+#memoryBox, #letterOverlay, #finalMessage {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.92);
-  z-index: 1500;
   justify-content: center;
   align-items: center;
-}
-
-#memoryBox img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: 6px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-}
-
-#letterOverlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 1600;
-  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,250,0.98));
-  justify-content: center;
-  align-items: center;
-  padding: 28px;
-}
-
-.letterCard {
-  max-width: 900px;
-  width: 94%;
-  background: #fff;
-  border-radius: 18px;
-  padding: 28px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-  text-align: center;
-}
-
-#finalMessage {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 1700;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  background: linear-gradient(180deg, rgba(255,75,114,0.06), rgba(255,75,114,0.02));
-  text-align: center;
-}
-
-#finalMessage h2 {
-  font-size: 3rem;
-  color: #ff2d5a;
-  margin: 0;
 }
 
 #startOverlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.85);
-  z-index: 2000;
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  color: #fff;
-  font-family: "Poppins", sans-serif;
 }
 
 #startButton {
@@ -157,24 +85,18 @@ h1 {
   background: #ff4b72;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
-  transition: 0.2s ease;
-}
-
-#startButton:hover {
-  transform: translateY(-3px);
+  color: white;
+  border: none;
 }
 </style>
 </head>
 
 <body>
+
 <div class="custom-cursor" id="cursorDot"></div>
 
-<!-- Start Overlay -->
 <div id="startOverlay">
   <button id="startButton">Click to Start 🎵💖</button>
-
-  <!-- FIXED AUDIO ELEMENT -->
   <audio id="bgMusic" src="music/rlmjmd.mp3"></audio>
 </div>
 
@@ -185,7 +107,7 @@ h1 {
 <div id="memoryBox"></div>
 
 <div id="letterOverlay">
-  <div class="letterCard" id="letterCard"></div>
+  <div id="letterCard"></div>
 </div>
 
 <div id="finalMessage">
@@ -196,30 +118,32 @@ h1 {
 const TOTAL_HEARTS = 25;
 let heartsCaught = 0;
 let playing = false;
+let burstTimer;
 
 const MEMORIES = [
-  "images/1.jpg","images/2.jpg","images/3.jpg","images/4.jpg",
-  "images/5.jpg","images/6.jpg","images/7.jpg"
+  "images/1.jpg","images/2.jpg","images/3.jpg",
+  "images/4.jpg","images/5.jpg","images/6.jpg","images/7.jpg"
 ];
 const triggers = [3,7,11,14,17,22,25];
-const memoryMap = triggers.map((t,i)=>({trigger:t, src:MEMORIES[i]}));
 
 const bgMusic = document.getElementById("bgMusic");
+const startButton = document.getElementById("startButton");
+const startOverlay = document.getElementById("startOverlay");
 
-// Preload images
-MEMORIES.forEach(src => {
-  const img = new Image();
-  img.src = src;
+startButton.addEventListener("click", () => {
+  bgMusic.volume = 0.5;
+  bgMusic.play();          // ✅ FIXED: plays in user gesture
+  startOverlay.style.display = "none";
+  startGame();
 });
 
-// Custom cursor
-const cursorDot = document.getElementById("cursorDot");
-window.addEventListener("mousemove", e => {
-  cursorDot.style.left = e.clientX+"px";
-  cursorDot.style.top = e.clientY+"px";
-});
+function startGame() {
+  playing = true;
+  document.getElementById("mainTitle").style.display = "none";
+  spawnBurst();
+  burstTimer = setInterval(spawnBurst, 1200);
+}
 
-// Heart creation
 function createHeart() {
   const h = document.createElement("div");
   h.className = "heart";
@@ -228,77 +152,44 @@ function createHeart() {
   h.style.top = window.innerHeight+"px";
   document.body.appendChild(h);
 
-  h.onclick = h.ontouchstart = () => {
+  h.onclick = () => {
     if(!playing) return;
     heartsCaught++;
-    const match = memoryMap.find(m=>m.trigger===heartsCaught);
-    if(match) showMemory(match.src);
     h.remove();
+
+    if (triggers.includes(heartsCaught)) {
+      showMemory(MEMORIES[triggers.indexOf(heartsCaught)]);
+    }
+
     if(heartsCaught >= TOTAL_HEARTS) endGame();
   };
 
   setTimeout(()=>h.remove(), 14000);
 }
 
-// Burst of hearts
 function spawnBurst() {
   if(!playing) return;
-  for(let i=0;i<5;i++){
-    setTimeout(createHeart, i*200);
-  }
+  for(let i=0;i<5;i++) setTimeout(createHeart, i*200);
 }
-
-let burstTimer = null;
-
-// Start game
-function startGame() {
-  heartsCaught = 0;
-  playing = true;
-  document.getElementById("mainTitle").style.display = "none";
-  spawnBurst();
-  burstTimer = setInterval(spawnBurst, 1200);
-}
-
-// Show memory
-const memoryBox = document.getElementById("memoryBox");
 
 function showMemory(src) {
   playing = false;
-  memoryBox.innerHTML = `<img src="${src}">`;
-  memoryBox.style.display = "flex";
+  const box = document.getElementById("memoryBox");
+  box.innerHTML = `<img src="${src}" style="max-width:90%">`;
+  box.style.display = "flex";
 
-  setTimeout(()=>{
-    memoryBox.style.display = "none";
+  setTimeout(() => {
+    box.style.display = "none";
     playing = true;
   }, 4000);
 }
 
-// End game
-const letterOverlay = document.getElementById("letterOverlay");
-const letterCard = document.getElementById("letterCard");
-const finalMessage = document.getElementById("finalMessage");
-
 function endGame() {
   playing = false;
   clearInterval(burstTimer);
-
-  setTimeout(()=>{
-    letterCard.innerHTML = `
-      <p style="font-size:1.3rem; color:#ff2d5a;">My Dearest,</p>
-      <p>You collected all the hearts… just like you collected mine 💖</p>
-      <p>You're the most special part of my life, and I made all of this just to see you smile.</p>
-      <p>My love, my happiness, my everything…</p>
-      <button id="nextBtn" style="margin-top:20px;padding:10px 18px;background:#ff4b72;color:#fff;border:none;border-radius:10px;font-size:1rem;">Next</button>
-    `;
-
-    letterOverlay.style.display = "flex";
-
-    document.getElementById("nextBtn").onclick = () => {
-      letterOverlay.style.display = "none";
-      finalMessage.style.display = "flex";
-    };
-  }, 1000);
+  document.getElementById("finalMessage").style.display = "flex";
 }
+</script>
 
-// START BUTTON → PLAY MUSIC + START GAME
-const startButton = document.getElementById("startButton
+</body>
+</html>
